@@ -1,10 +1,11 @@
-import { CreateUserParams, SignInParams } from "@/type";
+import { CreateUserParams, GetMenuParams, SignInParams } from "@/type";
 import {
   Account,
   Avatars,
   Client,
   ID,
   Query,
+  Storage,
   TablesDB,
 } from "react-native-appwrite";
 
@@ -13,7 +14,12 @@ export const appwriteConfig = {
   platform: "com.nika.foodordering",
   projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID!,
   databaseId: "68b7084c00339f9967b9",
-  tableId: "user",
+  bucketId: "68bb1f86000d8b660afd",
+  userTableId: "user",
+  categoriesTableId: "categories",
+  menuTableId: "menu",
+  customisationsTableId: "customisations",
+  menuCustomisationsTableId: "menu_customisations",
 };
 
 export const client = new Client();
@@ -26,6 +32,7 @@ client
 export const account = new Account(client);
 export const tablesDB = new TablesDB(client);
 export const avatars = new Avatars(client);
+export const storage = new Storage(client);
 
 export const createUser = async ({
   email,
@@ -42,7 +49,7 @@ export const createUser = async ({
 
     return await tablesDB.createRow(
       appwriteConfig.databaseId,
-      appwriteConfig.tableId,
+      appwriteConfig.userTableId,
       ID.unique(),
       { account_id: newAccount.$id, email, name, avatar: avatarUrl },
     );
@@ -66,7 +73,7 @@ export const getCurrentUser = async () => {
 
     const user = await tablesDB.listRows(
       appwriteConfig.databaseId,
-      appwriteConfig.tableId,
+      appwriteConfig.userTableId,
       [Query.equal("account_id", currentAccount.$id)],
     );
     if (!user.total) throw new Error("User not found");
@@ -74,6 +81,38 @@ export const getCurrentUser = async () => {
     return user.rows[0];
   } catch (error) {
     console.log(error);
+    throw new Error(error as string);
+  }
+};
+
+export const getMenu = async ({ category, query, limit }: GetMenuParams) => {
+  try {
+    const queries: string[] = [];
+    if (category) queries.push(Query.equal("categories", category));
+    if (query) queries.push(Query.search("name", query));
+    if (limit) queries.push(Query.limit(limit));
+
+    const menus = await tablesDB.listRows(
+      appwriteConfig.databaseId,
+      appwriteConfig.menuTableId,
+      queries,
+    );
+
+    return menus.rows;
+  } catch (error) {
+    throw new Error(error as string);
+  }
+};
+
+export const getCategories = async () => {
+  try {
+    const categories = await tablesDB.listRows(
+      appwriteConfig.databaseId,
+      appwriteConfig.categoriesTableId,
+    );
+
+    return categories.rows;
+  } catch (error) {
     throw new Error(error as string);
   }
 };

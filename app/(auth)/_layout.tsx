@@ -18,12 +18,11 @@ export default function AuthLayout() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1"
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        className="bg-white"
+        className="h-full bg-white"
         keyboardShouldPersistTaps="handled"
       >
         <View
