@@ -1,6 +1,8 @@
 import CartButton from "@/components/CartButton";
+import MenuCard from "@/components/MenuCard";
 import { getCategories, getMenu } from "@/lib/appwrite";
 import useAppwrite from "@/lib/useAppwrite";
+import { MenuItem } from "@/type";
 import cn from "clsx";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
@@ -19,13 +21,13 @@ const Search = () => {
     loading,
   } = useAppwrite({
     fn: getMenu,
-    params: { category: category as string, query: query as string, limit: 6 },
+    params: { category: category as string, query: query as string },
   });
 
   const { data: categories } = useAppwrite({ fn: getCategories });
 
   useEffect(() => {
-    refetch({ category: category as string, query: query as string, limit: 6 });
+    refetch({ category: category as string, query: query as string });
   }, [category, query, refetch]);
 
   return (
@@ -42,7 +44,7 @@ const Search = () => {
                 !isFirstRightColItem ? "mt-10" : "mt-0",
               )}
             >
-              <Text>Menu Cards</Text>
+              <MenuCard item={item as unknown as MenuItem} />
             </View>
           );
         }}
